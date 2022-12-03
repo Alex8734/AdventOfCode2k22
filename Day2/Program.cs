@@ -43,6 +43,7 @@ foreach (var line in file)
     }
 }
 
+Console.WriteLine(points);
 //part2
 points = 0;
 
