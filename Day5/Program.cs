@@ -55,7 +55,7 @@ void MakeMoveP2(int from, int to, int items)
 {
     from--;
     to--;
-    for (int i = 0; i > 0; i--)
+    for (int i = items; i > 0; i--)
     {
         int row = table[from].Count - i;
         table[to].Add(table[from][row]);
@@ -68,9 +68,8 @@ void MakeMoveP1(int from, int to, int items)
     to--;
     for (int i = 0; i <items; i++)
     {
-        int row = table[from].Count-1;
-        table[to].Add(table[from][row]);
-        table[from].Remove(table[from][row]);
+        table[to].Add(table[from][^1]);
+        table[from].Remove(table[from][^1]);
     }
 }
 
