@@ -1,97 +1,101 @@
-﻿var file = File.ReadAllLines("data.csv");
+﻿var input = File.ReadAllLines(@"data.csv");
 
-var table  = new List<List<char>>();
+int stacksLine = Array.FindIndex(input, line => line.StartsWith(" 1"));
+int stacksNumber = input[stacksLine].Trim().Last() - '0';
 
-int endOfTable = GetEndOfTable();
-//read table from file
-for (int i = 1; i < file[endOfTable].Length; i += 4)
+var cratesStartingStack = input.Take(stacksLine).ToArray().Reverse();
+var instructions = Array.FindAll(input, line => line.StartsWith("move"));
+
+List<Stack<string>> cratesToRearrange = new List<Stack<string>>();
+
+for (int i = 0; i < stacksNumber; i++)
 {
-    table.Add(new List<char>());
-    for (int j = endOfTable - 1; j >= 0; j--)
+    cratesToRearrange.Add(new Stack<string>());
+}
+
+foreach (var line in cratesStartingStack)
+{
+    int lineCounter = 0;
+    for (int j = 1; j <= line.Length; j += 4)
     {
-        if (file[j][i] != 32)
-            table[i / 4].Add(file[j][i]);
-    }
-}
-
-//move
-for (int i = endOfTable + 2; i < file.Length; i++)
-{
-    var dataLine = file[i].Split(" ");
-    MakeMoveP1(int.Parse(dataLine[3]), int.Parse(dataLine[5]), int.Parse(dataLine[1]));
-}
-PrintResi();
-Console.WriteLine();
-
-//part 2
-
-#region part2
-
-
-table = new List<List<char>>();
-
-endOfTable = GetEndOfTable();
-//read table from file
-for (int i = 1; i < file[endOfTable].Length; i += 4)
-{
-    table.Add(new List<char>());
-    for (int j = endOfTable - 1; j >= 0; j--)
-    {
-        if (file[j][i] != 32)
-            table[i / 4].Add(file[j][i]);
-    }
-}
-//move
-for (int i = endOfTable + 2; i < file.Length; i++)
-{
-    var dataLine = file[i].Split(" ");
-    MakeMoveP2(int.Parse(dataLine[3]), int.Parse(dataLine[5]), int.Parse(dataLine[1]));
-}
-PrintResi();
-
-#endregion
-
-void MakeMoveP2(int from, int to, int items)
-{
-    from--;
-    to--;
-    for (int i = items; i > 0; i--)
-    {
-        int row = table[from].Count - i;
-        table[to].Add(table[from][row]);
-        table[from].Remove(table[from][row]);
-    }
-}
-void MakeMoveP1(int from, int to, int items)
-{
-    from--;
-    to--;
-    for (int i = 0; i <items; i++)
-    {
-        table[to].Add(table[from][^1]);
-        table[from].Remove(table[from][^1]);
-    }
-}
-
-int GetEndOfTable()
-{
-    for (var i = 0; i < file.Length; i++)
-    {
-        var line = file[i];
-        if (line.Contains("1"))
+        var crate = line.ElementAt(j).ToString();
+        if (!string.IsNullOrWhiteSpace(crate))
         {
-            return i;
+            cratesToRearrange.ElementAt(lineCounter).Push(crate);
         }
+        lineCounter++;
     }
+}
+foreach (var line in instructions)
+{
+    var moves = line.Trim().Split(' ');
+    int cratesToMove = int.Parse(moves.ElementAt(1));
+    int previousStack = int.Parse(moves.ElementAt(3)) - 1;
+    int nextStack = int.Parse(moves.ElementAt(5)) - 1;
 
-    return file.Length;
+    while (cratesToMove > 0)
+    {
+        var crate = cratesToRearrange.ElementAt(previousStack).Pop();
+        cratesToRearrange.ElementAt(nextStack).Push(crate);
+        cratesToMove--;
+    }
 }
 
-void PrintResi()
+foreach (var stack in cratesToRearrange)
 {
-    for (int i = 0; i < table.Count; i++)
+    Console.Write($"{stack.Peek()}");
+}
+
+stacksLine = Array.FindIndex(input, line => line.StartsWith(" 1"));
+stacksNumber = input[stacksLine].Trim().Last() - '0';
+
+cratesStartingStack = input.Take(stacksLine).ToArray().Reverse();
+instructions = Array.FindAll(input, line => line.StartsWith("move"));
+
+cratesToRearrange = new List<Stack<string>>();
+
+for (int i = 0; i < stacksNumber; i++)
+{
+    cratesToRearrange.Add(new Stack<string>());
+}
+
+foreach (var line in cratesStartingStack)
+{
+    int lineCounter = 0;
+    for (int j = 1; j <= line.Length; j += 4)
     {
-        Console.Write(table[i][table[i].Count-1]);
-        
+        var crate = line.ElementAt(j).ToString();
+        if (!string.IsNullOrWhiteSpace(crate))
+        {
+            cratesToRearrange.ElementAt(lineCounter).Push(crate);
+        }
+        lineCounter++;
     }
+}
+foreach (var line in instructions)
+{
+    var moves = line.Trim().Split(' ');
+    int cratesToMove = int.Parse(moves.ElementAt(1));
+    int previousStack = int.Parse(moves.ElementAt(3)) - 1;
+    int nextStack = int.Parse(moves.ElementAt(5)) - 1;
+    var miniStack = new Stack<string>();
+
+    while (cratesToMove > 0)
+    {
+        var crate = cratesToRearrange.ElementAt(previousStack).Pop();
+        miniStack.Push(crate);
+        cratesToMove--;
+    }
+
+    while (miniStack.Count() > 0)
+    {
+        var crate = miniStack.Pop();
+        cratesToRearrange.ElementAt(nextStack).Push(crate);
+    }
+}
+
+Console.WriteLine();
+foreach (var stack in cratesToRearrange)
+{
+    Console.Write($"{stack.Peek()}");
 }
