@@ -1,9 +1,8 @@
 ﻿using Day7;
-using Directory = System.IO.Directory;
-using File = System.IO.File;
+using Directory = Day7.Directory;
 using Type = Day7.Type;
 
-var file = File.ReadAllLines("data.csv");
+var file = System.IO.File.ReadAllLines("data.csv");
 var env = new Day7.FileSystem();
 string lastCommand = "";
 foreach (var line in file)
@@ -42,6 +41,7 @@ foreach (var line in file)
 }
 
 Console.WriteLine(CountDirsWithLess(100000,env.Root));
+Console.WriteLine(FindSmallestDirToDelete(env.Root));
 int CountDirsWithLess(int maxSize, Day7.Directory dir)
 {
     int sum = 0;
@@ -61,4 +61,28 @@ int CountDirsWithLess(int maxSize, Day7.Directory dir)
 }
 
 
+
+int FindSmallestDirToDelete(Day7.Directory dir)
+{
+    int smallestDir = env.Root.Size;
+    int spaceToFree = 30_000_000 - (70_000_000 - env.Root.Size);
+
+    if (dir.Size > spaceToFree && dir.Size < smallestDir && dir.Type == Type.Directory)
+    {
+        smallestDir = dir.Size;
+    }
+
+    if (dir.Type == Type.Directory)
+    {
+        foreach (var child in dir.Childes)
+        {
+            var temp = FindSmallestDirToDelete(child);
+            if ( temp > spaceToFree && temp< smallestDir)
+            {
+                smallestDir = temp;
+            }
+        }
+    }
+    return smallestDir;
+}
 
